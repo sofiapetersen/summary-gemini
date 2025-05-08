@@ -96,7 +96,7 @@ Siga os passos abaixo para configurar e rodar o projeto localmente.
     DATABASE_URL='postgresql://postgres:[SUA-SENHA-SUPABASE]@<host>:<port>/<database-name>'
     JWT_SECRET_KEY='sua_chave_secreta_bem_longa_e_aleatoria_para_jwt'
     GOOGLE_API_KEY='SUA_CHAVE_API_DO_GOOGLE_GEMINI_AQUI'
-    # SECRET_KEY='outra_chave_secreta_bem_longa_e_aleatoria'
+    SECRET_KEY='outra_chave_secreta_bem_longa_e_aleatoria'
     ```
     Substitua os valores entre `[]` e `<>` pelas suas credenciais.
 5.  Rode o servidor Flask:
@@ -137,31 +137,3 @@ Siga os passos abaixo para configurar e rodar o projeto localmente.
 8.  Se o processamento for bem-sucedido, uma mensagem de sucesso aparecerá junto com um link para baixar o arquivo "resumo\_gerado.pdf".
 9.  Clique no link para baixar o PDF com o resumo.
 10. Para sair, clique no botão "Sair".
-
-## Estrutura do Projeto
-
-.
-├── backend-flask/
-│   ├── .env
-│   ├── app.py              # Configuração principal do Flask, DB, JWT, CORS, Gemini, Modelo User, registro das rotas
-│   ├── venv/               # Ambiente virtual Python
-│   ├── routes/
-│   │   ├── init.py
-│   │   ├── auth.py         # Rotas de cadastro, login e protegido
-│   │   └── summary.py      # Rota de upload/resumo e funções auxiliares (extração, gemini, pdf)
-│   └── requirements.txt    # Dependências Python 
-└── frontend-vue/
-├── public/
-├── src/
-│   ├── assets/
-│   ├── components/
-│   ├── router/
-│   │   └── index.js    # Configuração do Vue Router e guards
-│   ├── views/
-│   │   ├── Dashboard.vue # Dashboard protegida, upload e download
-│   │   ├── Login.vue     # Formulário de Login
-│   │   └── Register.vue  # Formulário de Cadastro
-│   └── App.vue           # Layout principal com router-view
-├── .gitignore
-├── package.json        # Dependências Node.js (frontend)
-└── ... outros arquivos do Vue CLI
