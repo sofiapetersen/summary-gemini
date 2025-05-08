@@ -33,7 +33,8 @@ export default {
     async register() {
       this.message = ''; // Limpa mensagens anteriores
       try {
-        const response = await axios.post('http://localhost:5000/register', { // URL base da API Flask
+        const API_URL = process.env.VUE_APP_API_URL;
+        const response = await axios.post(`${API_URL}/register`, { // URL base da API Flask
           username: this.username,
           password: this.password
         });

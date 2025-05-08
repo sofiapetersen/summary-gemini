@@ -33,7 +33,8 @@ export default {
     async login() {
        this.message = ''; 
        try {
-        const response = await axios.post('http://localhost:5000/login', { // URL base da API Flask
+        const API_URL = process.env.VUE_APP_API_URL;
+        const response = await axios.post(`${API_URL}/login`, { // URL base da API Flask
           username: this.username,
           password: this.password
         });

@@ -20,7 +20,7 @@
 import axios from 'axios';
 
 // URL base da API Flask
-const API_URL = 'http://localhost:5000';
+const API_URL = process.env.VUE_APP_API_URL;
 
 export default {
   name: 'UserDashboard',

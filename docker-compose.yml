@@ -1,0 +1,21 @@
+services:
+
+  # Serviço do Backend Flask
+  backend:
+    build:
+      context: ./backend-flask 
+      dockerfile: Dockerfile   
+    ports:
+      - "5000:5000"          
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+
+  # Serviço do Frontend Vue.js
+  frontend:
+    build:
+      context: ./frontend-vue
+      dockerfile: Dockerfile   
+    ports:
+      - "8080:80"             
