@@ -4,4 +4,3 @@ __pycache__/
 *.pyo
 *.log
 .pytest_cache/
-.env # Não copie o .env local, ele é tratado pelo docker-compose

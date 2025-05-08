@@ -1,16 +1,18 @@
 <template>
-  <div id="app">
-    <router-view/>
-  </div>
+  <v-app>
+    <v-main>
+      <router-view/>
+    </v-main>
+  </v-app>
 </template>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
-  margin-top: 60px;
+<script>
+
+export default {
+  name: 'App',
+
+  data: () => ({
+    //
+  }),
 }
-/* Estilos globais básicos */
-</style>
+</script>
