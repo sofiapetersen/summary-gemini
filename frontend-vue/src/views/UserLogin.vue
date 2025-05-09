@@ -12,7 +12,7 @@
         </v-btn>
       </div>
 
-      <v-card-title class="text-h3 text-center mb-2 font-weight-bold text-primary">
+      <v-card-title class="text-h4 text-center mb-2 font-weight-bold text-primary">
         ResumosIA
       </v-card-title>
       
