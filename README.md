@@ -127,6 +127,18 @@ Siga os passos abaixo para configurar e rodar o projeto localmente.
     ```
     O frontend estará rodando em `http://localhost:8080/` .
 
+## Docker
+
+Se você tiver Docker instalado, poderá rodar o aplicativo através de docker compose.
+
+Na pasta raiz do projeto digite:
+
+```bash
+    docker compose up --build
+```
+
+Não se esqueça de editar a variavel const API_URL = ''; nos arquivos /frontend-vue/src/views/UserDashboard.vue , UserLogin.vue e UserRegister.vue e coloque o url do backend, http://localhost5000 .
+
 ## Como Usar
 
 1.  Abra seu navegador e vá para `http://localhost:8080/`. Você será redirecionado para a página de Login.
