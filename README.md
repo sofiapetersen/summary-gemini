@@ -117,7 +117,9 @@ Siga os passos abaixo para configurar e rodar o projeto localmente.
     # ou
     yarn install
     ```
-3.  Rode o servidor de desenvolvimento do Vue:
+3. Edite a variavel const API_URL = ''; nos arquivos /frontend-vue/src/views/UserDashboard.vue , UserLogin.vue e UserRegister.vue e coloque o url do backend, http://localhost5000 possivelmente.
+
+4.  Rode o servidor de desenvolvimento do Vue:
     ```bash
     npm run serve
     # ou

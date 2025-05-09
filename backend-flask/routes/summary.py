@@ -56,14 +56,14 @@ def generate_summary_with_gemini(text, model):
 def create_pdf_from_text(text):
     pdf = FPDF()
     pdf.add_page()
-    pdf.set_font("Arial", size=12)
+    pdf.set_font("Times", size=12)
     pdf.multi_cell(0, 10, text)
     pdf_output = pdf.output(dest='S')
     return pdf_output
 
 
 def register_summary_routes(app, jwt, model): # Passa as dependências
-    # "Registra as rotas de resumo e upload 
+    # Registra as rotas de resumo e upload 
 
     @app.route('/upload-and-summarize', methods=['POST'])
     @jwt_required() # Exige um token JWT válido 
