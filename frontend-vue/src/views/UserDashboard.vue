@@ -14,7 +14,7 @@
       </div>
 
       <v-card-title class="text-h3 text-center mb-4 font-weight-bold text-primary">
-        Dashboard
+        ResumosIA
       </v-card-title>
 
       <v-card-text>
@@ -27,7 +27,7 @@
         <v-card class="pa-4 mb-8" variant="outlined">
           <v-card-title class="text-h5 mb-4">
             <v-icon left>mdi-file-upload</v-icon>
-            Processar Arquivo com IA
+            Resumir Arquivo com IA
           </v-card-title>
 
           <v-file-input
@@ -143,7 +143,7 @@ const fetchProtectedData = async () => {
     const response = await axios.get(`${API_URL}/protected`, {
       headers: { Authorization: `Bearer ${token}` }
     })
-    welcomeMessage.value = `${response.data.message} \nLogado como: ${response.data.logged_in_as}`
+    welcomeMessage.value = `Carregue seu arquivo, ${response.data.logged_in_as}`
   } catch (error) {
     console.error("Erro ao buscar dados protegidos:", error)
     handleAuthError(error)

@@ -1,6 +1,5 @@
 <template>
   <v-container class="d-flex align-center justify-center fill-height" fluid>
-
     <v-card class="pa-8 login-card" width="100%" max-width="440" elevation="16">
       <div class="graphic-decoration">
         <svg viewBox="0 0 100 100" class="blob">
@@ -13,9 +12,13 @@
         </v-btn>
       </div>
 
-      <v-card-title class="text-h4 text-center mb-6 font-weight-bold text-primary">
-        Bem-vindo
+      <v-card-title class="text-h3 text-center mb-2 font-weight-bold text-primary">
+        ResumosIA
       </v-card-title>
+      
+      <v-card-subtitle class="text-caption text-sm-subtitle-1 text-center mb-4 text-medium-emphasis px-2" style="white-space: normal; line-height: 1.3">
+        Transforme seus documentos em insights
+      </v-card-subtitle>
 
       <v-card-text>
         <v-form @submit.prevent="login" class="form-content">
@@ -47,7 +50,6 @@
             :bg-color="isDark ? 'field-bg' : '#f8f9fa'"
             class="mt-2"
           ></v-text-field>
-
 
           <v-alert
             v-if="message"
