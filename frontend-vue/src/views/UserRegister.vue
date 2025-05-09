@@ -25,7 +25,7 @@
             variant="outlined"
             color="primary"
             density="comfortable"
-            :rules="[rules.required, rules.minUsernameLength]"
+            :rules="[rules.required]"
             autocomplete="username"
             rounded="lg"
             :bg-color="isDark ? 'field-bg' : '#f8f9fa'"
@@ -42,7 +42,7 @@
             variant="outlined"
             color="primary"
             density="comfortable"
-            :rules="[rules.required, rules.minLength(8)]"
+            :rules="[rules.required]"
             autocomplete="new-password"
             rounded="lg"
             :bg-color="isDark ? 'field-bg' : '#f8f9fa'"
@@ -110,15 +110,13 @@ const router = useRouter()
 
 const rules = {
   required: value => !!value || 'Campo obrigatório',
-  minLength: length => value => (value || '').length >= length || `Mínimo ${length} caracteres`,
-  minUsernameLength: value => (value || '').length >= 3 || 'Nome de usuário muito curto'
 }
 
 const register = async () => {
   message.value = ''
   loading.value = true
   try {
-    const API_URL = import.meta.env.VITE_API_URL
+    const API_URL = 'https://summary-gemini-ulr3.onrender.com';
     const response = await axios.post(`${API_URL}/register`, {
       username: username.value,
       password: password.value

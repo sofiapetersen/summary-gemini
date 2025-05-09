@@ -118,7 +118,7 @@ const login = async () => {
   message.value = ''
   loading.value = true
   try {
-    const API_URL = import.meta.env.VITE_API_URL
+    const API_URL = 'https://summary-gemini-ulr3.onrender.com';
     const response = await axios.post(`${API_URL}/login`, {
       username: username.value,
       password: password.value

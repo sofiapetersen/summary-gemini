@@ -1,221 +1,284 @@
 <template>
-  <div class="dashboard">
-    <h1>Dashboard</h1>
-    <p>{{ welcomeMessage }}</p>
+  <v-container class="dashboard-container">
+    <v-card class="pa-6 dashboard-card" elevation="12">
+      <div class="graphic-decoration">
+        <svg viewBox="0 0 100 100" class="blob">
+          <path fill="currentColor" d="M31.8,-35.9C40.5,-27.7,46.7,-16.5,49.8,-3.8C52.9,8.9,52.9,23.1,45.1,34.4C37.3,45.7,21.7,54.1,5.3,52.5C-11.1,50.9,-28.4,39.3,-39.4,25.1C-50.5,10.9,-55.3,-5.9,-50.4,-19.8C-45.5,-33.7,-30.9,-44.7,-15.9,-50.1C-0.9,-55.6,14.5,-55.5,31.8,-35.9Z"/>
+        </svg>
+      </div>
 
-    <h2>Processar Arquivo com IA</h2>
-    <input type="file" ref="fileInput" @change="handleFileUpload" accept=".txt,.pdf">
-    <button @click="uploadAndSummarize" :disabled="!selectedFile || loading">
-      {{ loading ? 'Processando...' : 'Upload e Resumir' }}
-    </button>
+      <div class="d-flex justify-end mb-2">
+        <v-btn icon variant="text" @click="toggleTheme" class="theme-toggle-btn">
+          <v-icon>{{ isDark ? 'mdi-white-balance-sunny' : 'mdi-moon-waxing-crescent' }}</v-icon>
+        </v-btn>
+      </div>
 
-    <p v-if="message">{{ message }}</p>
-    <p v-if="downloadUrl"><a :href="downloadUrl" download="resumo_gerado.pdf">Baixar Resumo PDF</a></p>
+      <v-card-title class="text-h3 text-center mb-4 font-weight-bold text-primary">
+        Dashboard
+      </v-card-title>
 
-    <button @click="logout">Sair</button>
-  </div>
+      <v-card-text>
+        <div class="text-h6 text-center mb-8">
+          {{ welcomeMessage }}
+        </div>
+
+        <v-divider class="my-6"></v-divider>
+
+        <v-card class="pa-4 mb-8" variant="outlined">
+          <v-card-title class="text-h5 mb-4">
+            <v-icon left>mdi-file-upload</v-icon>
+            Processar Arquivo com IA
+          </v-card-title>
+
+          <v-file-input
+            v-model="selectedFile"
+            accept=".txt,.pdf"
+            label="Selecione um arquivo"
+            prepend-icon="mdi-file-document"
+            variant="outlined"
+            color="primary"
+            :rules="[rules.fileRequired, rules.fileType]"
+            :loading="loading"
+            @change="handleFileUpload"
+            class="mb-4"
+          ></v-file-input>
+
+          <v-btn
+            color="primary"
+            size="large"
+            block
+            rounded="lg"
+            :loading="loading"
+            :disabled="!selectedFile || loading"
+            @click="uploadAndSummarize"
+          >
+            <v-icon left>mdi-robot</v-icon>
+            {{ loading ? 'Processando...' : 'Upload e Resumir' }}
+          </v-btn>
+
+          <v-alert
+            v-if="message"
+            :type="messageType"
+            density="compact"
+            variant="tonal"
+            class="mt-4"
+          >
+            {{ message }}
+          </v-alert>
+
+          <v-btn
+            v-if="downloadUrl"
+            color="success"
+            variant="outlined"
+            block
+            size="large"
+            rounded="lg"
+            class="mt-4"
+            :href="downloadUrl"
+            download="resumo_gerado.pdf"
+          >
+            <v-icon left>mdi-download</v-icon>
+            Baixar Resumo PDF
+          </v-btn>
+        </v-card>
+
+        <div class="text-center mt-8">
+          <v-btn
+            color="error"
+            size="large"
+            rounded="lg"
+            @click="logout"
+          >
+            <v-icon left>mdi-logout</v-icon>
+            Sair
+          </v-btn>
+        </div>
+      </v-card-text>
+    </v-card>
+  </v-container>
 </template>
 
-<script>
-import axios from 'axios';
+<script setup>
+import { ref, computed, onBeforeUnmount } from 'vue'
+import { useRouter } from 'vue-router'
+import { useTheme } from 'vuetify'
+import axios from 'axios'
 
-// URL base da API Flask
-const API_URL = process.env.VUE_APP_API_URL;
+const theme = useTheme()
+const isDark = computed(() => theme.global.name.value === 'dark')
+const toggleTheme = () => {
+  theme.global.name.value = isDark.value ? 'light' : 'dark'
+}
 
-export default {
-  name: 'UserDashboard',
-  data() {
-    return {
-      welcomeMessage: 'Carregando...',
-      selectedFile: null,
-      loading: false,
-      message: '',
-      downloadUrl: null
-    };
-  },
-  async created() {
-     await this.fetchProtectedData(); // Chama a função ao criar o componente
-  },
-  methods: {
-    async fetchProtectedData() {
-        const token = localStorage.getItem('jwt_token');
-        if (!token) {
-            this.welcomeMessage = 'Você não está autenticado.';
-            this.$router.push('/login');
-            return;
-        }
+const API_URL = 'https://summary-gemini-ulr3.onrender.com';
+const router = useRouter()
 
-        try {
-            const response = await axios.get(`${API_URL}/protected`, {
-                headers: {
-                    Authorization: `Bearer ${token}` // Inclui o token no cabeçalho
-                }
-            });
-            this.welcomeMessage = response.data.message + ' \n Logado como: ' + response.data.logged_in_as;
-        } catch (error) {
-            console.error("Erro ao buscar dados protegidos:", error);
-             this.handleAuthError(error);
-        }
-    },
+// Dados reativos
+const welcomeMessage = ref('Carregando...')
+const selectedFile = ref(null)
+const loading = ref(false)
+const message = ref('')
+const messageType = ref('info')
+const downloadUrl = ref(null)
 
-    handleFileUpload(event) {
-        // Limpa estado anterior ao selecionar novo arquivo
-        this.selectedFile = null;
-        this.message = '';
-        this.downloadUrl = null;
+// Regras de validação
+const rules = {
+  fileRequired: value => !!value || 'Arquivo obrigatório',
+  fileType: value => !value || 
+    ['text/plain', 'application/pdf'].includes(value.type) || 
+    /\.(txt|pdf)$/i.test(value.name) || 
+    'Apenas arquivos .txt ou .pdf'
+}
 
-        const files = event.target.files;
-        if (files.length > 0) {
-            const file = files[0];
-            const allowedTypes = ['text/plain', 'application/pdf'];
-            // Verifica o tipo MIME e a extensão do arquivo
-            if (allowedTypes.includes(file.type) || /\.(txt|pdf)$/i.test(file.name)) {
-                this.selectedFile = file;
-                this.message = `Arquivo selecionado: ${file.name}`;
-            } else {
-                this.message = 'Por favor, selecione um arquivo .txt ou .pdf.';
-                // Limpar o input do arquivo visualmente
-                this.$refs.fileInput.value = '';
-            }
-        }
-    },
+// Funções
+const fetchProtectedData = async () => {
+  const token = localStorage.getItem('jwt_token')
+  if (!token) {
+    welcomeMessage.value = 'Você não está autenticado.'
+    router.push('/login')
+    return
+  }
 
-    async uploadAndSummarize() {
-        if (!this.selectedFile) {
-            this.message = 'Por favor, selecione um arquivo primeiro.';
-            return;
-        }
-
-        this.loading = true;
-        this.message = 'Enviando arquivo e processando...';
-        this.downloadUrl = null; // Reset download URL
-
-        const token = localStorage.getItem('jwt_token');
-        if (!token) {
-            this.message = 'Você não está autenticado. Faça login novamente.';
-             this.$router.push('/login');
-             return;
-        }
-
-        const formData = new FormData();
-        formData.append('file', this.selectedFile); 
-
-        try {
-            const response = await axios.post(`${API_URL}/upload-and-summarize`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data', 
-                    'Authorization': `Bearer ${token}`
-                },
-                responseType: 'blob' 
-            });
-
-            const blob = new Blob([response.data], { type: 'application/pdf' });
-            this.downloadUrl = URL.createObjectURL(blob); 
-            this.message = 'Resumo gerado! Clique no link para baixar.';
-
-             this.$refs.fileInput.value = '';
-             this.selectedFile = null;
-
-
-        } catch (error) {
-            console.error("Erro no upload/processamento:", error);
-            this.selectedFile = null; 
-
-            let errorMessage = 'Erro ao processar o arquivo.';
-            if (error.response) {
-                 if (error.response.status === 401) {
-                     errorMessage = 'Sessão expirada ou inválida. Faça login novamente.';
-                     this.handleAuthError(error); // Trata erro de autenticação
-                     return; // Sai daqui após tratar 401
-                 } else if (error.response.data && error.response.data.message) {
-                       errorMessage = `Erro do servidor: ${error.response.status}`;
-                 } else {
-                    errorMessage = `Erro do servidor: ${error.response.status}`;
-                 }
-            } else if (error.request) {
-                errorMessage = 'Erro de rede. Servidor inalcançável.';
-            } else {
-                errorMessage = 'Erro ao configurar a requisição.';
-            }
-             this.message = errorMessage;
-
-        } finally {
-            this.loading = false;
-        }
-    },
-
-    handleAuthError(error) {
-         if (error.response && error.response.status === 401) {
-              localStorage.removeItem('jwt_token'); 
-              this.$router.push('/login'); 
-              this.message = 'Sessão expirada ou inválida. Faça login novamente.';
-         } else {
-             console.error("Erro não tratado na autenticação:", error);
-         }
-    },
-
-
-    logout() {
-        localStorage.removeItem('jwt_token');
-        this.$router.push('/login'); 
-    }
-  },
-  beforeUnmount() {
-    if (this.downloadUrl) {
-      URL.revokeObjectURL(this.downloadUrl);
-    }
+  try {
+    const response = await axios.get(`${API_URL}/protected`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    welcomeMessage.value = `${response.data.message} \nLogado como: ${response.data.logged_in_as}`
+  } catch (error) {
+    console.error("Erro ao buscar dados protegidos:", error)
+    handleAuthError(error)
   }
 }
+
+const handleFileUpload = () => {
+  message.value = ''
+  messageType.value = 'info'
+  downloadUrl.value = null
+}
+
+const uploadAndSummarize = async () => {
+  if (!selectedFile.value) {
+    message.value = 'Por favor, selecione um arquivo primeiro.'
+    messageType.value = 'error'
+    return
+  }
+
+  loading.value = true
+  message.value = 'Enviando arquivo e processando...'
+  messageType.value = 'info'
+  downloadUrl.value = null
+
+  const token = localStorage.getItem('jwt_token')
+  if (!token) {
+    message.value = 'Você não está autenticado. Faça login novamente.'
+    messageType.value = 'error'
+    router.push('/login')
+    return
+  }
+
+  const formData = new FormData()
+  formData.append('file', selectedFile.value)
+
+  try {
+    const response = await axios.post(`${API_URL}/upload-and-summarize`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'Authorization': `Bearer ${token}`
+      },
+      responseType: 'blob'
+    })
+
+    const blob = new Blob([response.data], { type: 'application/pdf' })
+    downloadUrl.value = URL.createObjectURL(blob)
+    message.value = 'Resumo gerado com sucesso!'
+    messageType.value = 'success'
+    selectedFile.value = null
+  } catch (error) {
+    console.error("Erro no upload/processamento:", error)
+    selectedFile.value = null
+    
+    if (error.response?.status === 401) {
+      handleAuthError(error)
+      return
+    }
+
+    message.value = error.response?.data?.message || 
+      'Erro ao processar o arquivo. Tente novamente.'
+    messageType.value = 'error'
+  } finally {
+    loading.value = false
+  }
+}
+
+const handleAuthError = (error) => {
+  if (error.response?.status === 401) {
+    localStorage.removeItem('jwt_token')
+    router.push('/login')
+    message.value = 'Sessão expirada ou inválida. Faça login novamente.'
+    messageType.value = 'error'
+  }
+}
+
+const logout = () => {
+  localStorage.removeItem('jwt_token')
+  router.push('/login')
+}
+
+fetchProtectedData()
+
+onBeforeUnmount(() => {
+  if (downloadUrl.value) {
+    URL.revokeObjectURL(downloadUrl.value)
+  }
+})
 </script>
 
 <style scoped>
- .dashboard {
-    text-align: center;
-    margin-top: 50px;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
+.dashboard-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.dashboard-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px !important;
+  transition: transform 0.3s ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-4px);
+}
+
+.graphic-decoration {
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  opacity: 0.1;
+  color: var(--v-primary);
+}
+
+.blob {
+  width: 200px;
+  height: 200px;
+  animation: blobFloat 20s ease-in-out infinite;
+}
+
+@keyframes blobFloat {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(10px, 10px) rotate(5deg); }
+  50% { transform: translate(-10px, 15px) rotate(-5deg); }
+  75% { transform: translate(15px, -10px) rotate(3deg); }
+}
+
+@media (max-width: 600px) {
+  .dashboard-card {
+    margin: 16px;
+    border-radius: 16px !important;
   }
-  h2 {
-      margin-top: 30px;
-      margin-bottom: 15px;
+  
+  .graphic-decoration {
+    display: none;
   }
-  input[type="file"] {
-      margin-bottom: 15px;
-  }
-  button {
-    padding: 10px 15px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-bottom: 10px;
-    margin-right: 10px;
-  }
-  button:hover:not(:disabled) {
-    background-color: #0056b3;
-  }
-   button:disabled {
-       background-color: #cccccc;
-       cursor: not-allowed;
-   }
-  button:last-child { 
-    background-color: #dc3545;
-    margin-right: 0;
-    margin-top: 20px;
-  }
-   button:last-child:hover:not(:disabled) {
-       background-color: #c82333;
-   }
-   a {
-       color: #007bff;
-       text-decoration: none;
-   }
-   a:hover {
-       text-decoration: underline;
-   }
+}
 </style>
